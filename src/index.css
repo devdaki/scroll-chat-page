@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  /* LINE 채팅 스타일 색상 */
+  --color-line-bg: #8cabd9;
+  --color-line-header: #7a9ccf;
+  --color-line-sent: #8de055;
+  --color-line-meta: #3d5a80;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-white text-neutral-900 antialiased;
+}
