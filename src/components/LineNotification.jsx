@@ -1,18 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from 'motion/react'
 
 // 이 컴포넌트를 둔 위치가 화면 가운데를 지나면 상단에 아이폰 스타일 LINE 알림이 내려와요.
 // autoHide=false: 아래로 지나면 뜨고, 다시 위로 올리면 사라져요.
 // autoHide=true: 지날 때마다 떴다가 duration(ms) 뒤에 자동으로 사라져요.
-export default function LineNotification({ sender, text, autoHide = false, duration = 3500 }) {
+// to: 알림을 탭하면 이동할 페이지 경로. 없으면 탭했을 때 알림만 닫혀요.
+export default function LineNotification({ sender, text, autoHide = false, duration = 3500, to }) {
   const triggerRef = useRef(null)
+  const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
   const [passed, setPassed] = useState(false)
   const [visible, setVisible] = useState(false)
 
   const checkPassed = () => {
-    const top = triggerRef.current?.getBoundingClientRect().top
-    if (top !== undefined) setPassed(top < window.innerHeight / 2)
+    const el = triggerRef.current
+    if (!el) return
+    // 기준: 이 위치가 화면 가운데에 닿을 때.
+    // 페이지 끝부분이라 가운데까지 못 올라오는 경우엔 맨 아래까지 스크롤하면 뜨도록.
+    const triggerY = el.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+    setPassed(window.scrollY >= Math.min(triggerY, maxScroll - 1))
   }
   const { scrollY } = useScroll()
   useMotionValueEvent(scrollY, 'change', checkPassed)
@@ -39,8 +47,8 @@ export default function LineNotification({ sender, text, autoHide = false, durat
             animate={{ opacity: 1, y: 0 }}
             exit={hidden}
             transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-            onClick={() => setVisible(false)}
-            className="fixed inset-x-0 top-0 z-50 mx-auto max-w-md px-2 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)]"
+            onClick={() => (to ? navigate(to) : setVisible(false))}
+            className={`fixed inset-x-0 top-0 z-50 mx-auto max-w-md px-2 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] ${to ? 'cursor-pointer' : ''}`}
           >
             <div className="flex items-center gap-3 rounded-[1.4rem] bg-white/75 p-3 shadow-lg ring-1 ring-black/5 backdrop-blur-xl">
               {/* LINE 앱 아이콘 */}
