@@ -1,6 +1,7 @@
 import Section from './components/Section.jsx'
 import YouTubeEmbed from './components/YouTubeEmbed.jsx'
 import ScrollChatSection from './components/ScrollChatSection.jsx'
+import LineNotification from './components/LineNotification.jsx'
 import { messages, chatPartner } from './data/chat.js'
 
 // 실제 영상 ID로 바꿔주세요 (youtube.com/watch?v=여기부분)
@@ -36,6 +37,8 @@ export default function App() {
           디자인 시안을 만들 때 실제 콘텐츠가 아직 준비되지 않았다면 이렇게 임시 텍스트를
           넣어 전체적인 흐름과 분위기를 먼저 확인할 수 있습니다.
         </p>
+        <p>그날 밤, 잠들려던 순간 휴대폰 화면이 켜졌습니다.</p>
+        <LineNotification sender="민지" text="자? 내일 잠깐 볼 수 있어?" />
         <p>아래로 스크롤하면 대화가 하나씩 이어집니다.</p>
       </Section>
 
