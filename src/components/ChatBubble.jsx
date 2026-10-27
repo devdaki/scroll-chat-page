@@ -2,6 +2,8 @@ import { motion } from 'motion/react'
 
 export default function ChatBubble({ message, partner }) {
   const isMe = message.from === 'me'
+  // 일본어(히라가나·가타카나 포함)는 한 글자 단위로 줄바꿈, 한국어는 단어 단위로 줄바꿈
+  const isJapanese = /[぀-ヿ]/.test(message.text)
 
   return (
     <motion.div
@@ -12,10 +14,11 @@ export default function ChatBubble({ message, partner }) {
     >
       {!isMe && <Avatar name={partner} />}
 
-      <div className={`flex max-w-[72%] flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+      {/* 말풍선은 시간 표시 바로 앞까지 늘어날 수 있음 (min-w-0: 남은 폭 안에서 줄바꿈) */}
+      <div className={`flex min-w-0 flex-col ${isMe ? 'items-end' : 'items-start'}`}>
         {!isMe && <span className="mb-0.5 text-xs text-neutral-800">{partner}</span>}
         <p
-          className={`rounded-2xl px-3.5 py-2 text-[15px] leading-snug break-keep text-neutral-900 ${
+          className={`rounded-2xl px-3.5 py-2 text-[15px] leading-snug wrap-break-word text-neutral-900 ${isJapanese ? 'break-normal' : 'break-keep'} ${
             isMe ? 'rounded-tr-sm bg-line-sent' : 'rounded-tl-sm bg-white'
           }`}
         >

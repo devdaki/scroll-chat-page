@@ -9,7 +9,7 @@ const delayFor = (message) => 700 + message.text.length * 60
 // 전체 화면 LINE 채팅방. 채팅방 최상단이 화면 맨 위에 닿으면 재생을 시작해서
 // 메시지가 시간차로 하나씩 도착하고,
 // 대화가 끝나면 children(이어지는 본문 등)이 채팅방 아래에 나타나요.
-// backTo: 뒤로 버튼을 눌렀을 때 갈 경로. 없으면 브라우저 뒤로가기.
+// backTo: 뒤로 버튼을 눌렀을 때 갈 경로. 없으면 버튼은 모양만 있어요.
 export default function ChatRoom({ messages, partner, date, backTo, children }) {
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
@@ -53,9 +53,13 @@ export default function ChatRoom({ messages, partner, date, backTo, children }) 
       <div ref={roomRef} className="mx-auto flex min-h-dvh max-w-md flex-col bg-line-bg">
         {/* 상단 헤더 */}
         <header className="sticky top-0 z-10 flex items-center gap-3 bg-line-header px-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 text-white">
-          <button type="button" onClick={() => (backTo ? navigate(backTo) : navigate(-1))} aria-label="뒤로" className="-ml-1 px-1 text-2xl leading-none">
-            ‹
-          </button>
+          {backTo ? (
+            <button type="button" onClick={() => navigate(backTo)} aria-label="뒤로" className="-ml-1 px-1 text-2xl leading-none">
+              ‹
+            </button>
+          ) : (
+            <span aria-hidden="true" className="-ml-1 px-1 text-2xl leading-none">‹</span>
+          )}
           <span className="flex-1 text-[17px] font-semibold">{partner}</span>
           <span className="text-sm tracking-widest">⌕ ☰</span>
         </header>
