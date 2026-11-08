@@ -44,9 +44,9 @@ export const chatLists = {
     { name: 'アヤちゃん', text: '誕生日プレゼント何がいい？', time: '오전 9:15', unread: 1 },
     { name: 'キリちゃん♥', text: '明日お店行ってもいい？', time: '어제', unread: 2 },
     { name: 'リナち♥', text: '今度いつ空いてる？', time: '어제' },
-    { name: 'サキ', text: 'シャンパン入れるね🍾', time: '10/24' },
-    { name: 'ユイちゃん♥', text: 'おつかれ〜', time: '10/22' },
-    { name: '梅宮 一', text: 'ひどいな〜〜笑', time: '11/12' },
-    { name: 'マユち', text: 'また会いたいな', time: '10/20', muted: true },
+    { name: 'サキ', text: 'シャンパン入れるね🍾', time: '10. 24.' },
+    { name: 'ユイちゃん♥', text: 'おつかれ〜', time: '10. 22.' },
+    { name: '梅宮 一', text: 'ひどいな〜〜笑', time: '11. 12.', opens: 'ume' },
+    { name: 'マユち', text: 'また会いたいな', time: '10. 20.', muted: true },
   ],
 }

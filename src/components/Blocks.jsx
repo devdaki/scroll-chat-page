@@ -100,6 +100,7 @@ function Block({ block, hasMore, reveal, onDone }) {
           backTo={block.backTo}
           instant={block.instant}
           draft={block.draft}
+          typeSpeed={block.typeSpeed}
           hasMore={hasMore}
           onDone={onDone}
         />

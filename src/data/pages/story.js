@@ -7,7 +7,7 @@
 //                opens: 탭하면 펼칠 채팅방 id. to: 탭하면 이동할 페이지 경로
 //   help         { text }                              가운데 정렬 회색 도움말 (줄바꿈 가능)
 //   list         { title, items: [...], numbered? }     회색 박스 목록 (안내 페이지용)
-//   chat         { messages, partner, date?, id?, hidden?, backTo?, instant?, draft? }  전체 화면 채팅방.
+//   chat         { messages, partner, date?, id?, hidden?, backTo?, instant?, draft?, typeSpeed? }  전체 화면 채팅방.
 //                date: '10월 27일 (월)'이면 맨 위에 하나, 여러 개는 { 0: '10월 26일 (일)', 6: '10월 27일 (월)' }
 //                      (숫자 = 몇 번째 메시지 앞에 넣을지, 0부터 셈)
 //                채팅방 뒤에 오는 블록들은 대화가 끝난 뒤에 나타나요.
@@ -17,6 +17,8 @@
 //                draft: '괜찮아?'처럼 쓰면 대화가 끝난 뒤 키보드가 올라오고 입력칸에 그 글자를 타이핑해요.
 //                       지우기도 섞으려면 배열로: ['괜찮아?', { erase: 'all' }, '뭐해']
 //                       { erase: 3 } 뒤에서 3글자 지우기('all'은 전부), { wait: 800 } 0.8초 멈추기
+//                       { text: '괜찮', speed: 300 } 이 부분만 속도 따로 (erase에도 speed 가능)
+//                typeSpeed: 키 하나 누르는 간격(ms). 기본 170, 클수록 느려요.
 //   chatlist     { rooms, title? }                     전체 화면 LINE 대화 목록 (rooms는 chats.js의 chatLists에서)
 import { chatLists, chats } from '../chats.js'
 export default {
@@ -295,11 +297,15 @@ export default {
         `엔도는 괜히 채팅방 목록을 쭉쭉 내려보았다. 키리짱, 톳짱, 히카리짱. 수많은 짱들 사이에서 이모티콘 하나 안 붙은 딱딱한 우메미야 하지메를 찾는 건 어려운 일이 아니었다. `,
       ],
     },
+    { type: 'help', text: `위 목록에서 우메미야의 채팅방을 눌러 대화를 확인해보세요.` },
+    // 대화 목록에서 梅宮 一를 탭하면 나타나는 채팅방 (chats.js의 chatLists에 opens: 'ume')
     {
       type: 'chat',
+      id: 'ume',
+      hidden: true,
       ...chats.ume,
       instant: true,
-      date: { 0: '11월 3일 (화)', 1: '11월 5일 (목)', 2: '11월 10일 (화)', 5: '11월 12일 (목)' },
+      date: { 0: '11. 3. (화)', 1: '11. 5. (목)', 2: '11. 10. (화)', 5: '11. 12. (목)' },
     },
     {
       type: 'section',
@@ -311,12 +317,13 @@ export default {
       type: 'chat',
       ...chats.ume,
       instant: true,
-      date: { 0: '11월 3일 (화)', 1: '11월 5일 (목)', 2: '11월 10일 (화)', 5: '11월 12일 (목)' },
+      date: { 0: '11. 3. (화)', 1: '11. 5. (목)', 2: '11. 10. (화)', 5: '11. 12. (목)' },
       draft: [
         '괜찮', { wait: 1000 }, { erase: 'all' },
         '그럴줄알', { wait: 1000 },{ erase: 'all' },
         '밥은', { wait: 1000 }, { erase: 'all' },
       ],
+      typeSpeed: 300,
     },
     {
       type: 'section',

@@ -61,29 +61,33 @@ export function typingSteps(sentence, prefix = '') {
 
 // ChatRoom의 draft를 키 누르는 순서로 바꿔요.
 // draft: '괜찮아?' 처럼 문자열 하나, 또는 아래 항목들의 배열
-//   '문자열'          → 지금 입력칸 뒤에 이어서 타이핑
-//   { erase: 3 }      → 뒤에서부터 3글자 지우기 ('all'이면 전부)
-//   { wait: 800 }     → 0.8초 멈추기
-// 각 단계에 delay(ms)가 있으면 그 단계 전에 그만큼 기다려요.
+//   '문자열'                    → 지금 입력칸 뒤에 이어서 타이핑
+//   { text: '문자열', speed: 300 } → 이 부분만 키 하나당 300ms로 타이핑
+//   { erase: 3 }                → 뒤에서부터 3글자 지우기 ('all'이면 전부), speed도 쓸 수 있어요
+//   { wait: 800 }               → 0.8초 멈추기
+// typeSpeed: 키 하나 누르는 간격(ms) 기본값. 숫자가 클수록 느려요.
+// 각 단계의 delay(ms) = 그 단계 전에 기다리는 시간
 const ERASE_INTERVAL = 110
 const ERASE_PAUSE = 700
 
-export function draftSteps(draft) {
+export function draftSteps(draft, typeSpeed = 170) {
   const items = Array.isArray(draft) ? draft : [draft]
   const steps = []
   let text = ''
 
-  for (const item of items) {
-    if (typeof item === 'string') {
-      const typed = typingSteps(item, text)
-      steps.push(...typed)
+  for (const raw of items) {
+    const item = typeof raw === 'string' ? { text: raw } : raw
+    if (typeof item?.text === 'string') {
+      const typed = typingSteps(item.text, text)
+      steps.push(...typed.map((step) => ({ ...step, delay: item.speed ?? typeSpeed })))
       text = typed.at(-1)?.text ?? text
     } else if (item?.erase) {
       const chars = [...text]
       const count = item.erase === 'all' ? chars.length : Math.min(item.erase, chars.length)
       for (let n = 1; n <= count; n++) {
         // 지우기 시작 전엔 잠깐 망설이고, 그다음은 빠르게
-        steps.push({ key: 'back', text: chars.slice(0, chars.length - n).join(''), delay: n === 1 ? ERASE_PAUSE : ERASE_INTERVAL })
+        const delay = n === 1 ? ERASE_PAUSE : (item.speed ?? ERASE_INTERVAL)
+        steps.push({ key: 'back', text: chars.slice(0, chars.length - n).join(''), delay })
       }
       text = chars.slice(0, chars.length - count).join('')
     } else if (item?.wait) {

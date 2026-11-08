@@ -1,15 +1,14 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
 import { useNavigate } from 'react-router'
-import ChatBubble, { Avatar } from './ChatBubble.jsx'
+import ChatBubble, { Avatar, AvatarSpace } from './ChatBubble.jsx'
 import Keyboard from './Keyboard.jsx'
 import { draftSteps } from './hangul.js'
 
 // 메시지 사이 간격: 기본 대기 + 글자 수만큼 '입력 중' 시간
 const delayFor = (message) => 700 + message.text.length * 60
-// 키보드가 올라온 뒤 타이핑 시작까지, 키 하나 누르는 간격
+// 키보드가 올라온 뒤 타이핑 시작까지
 const KEYBOARD_DELAY = 900
-const KEY_INTERVAL = 170
 
 // 전체 화면 LINE 채팅방. 채팅방 최상단이 화면 맨 위에 닿으면 재생을 시작해서
 // 메시지가 시간차로 하나씩 도착하고,
@@ -21,7 +20,8 @@ const KEY_INTERVAL = 170
 // instant: true면 재생 없이 처음부터 전체 대화가 다 보여요.
 // draft: 대화가 끝나면 키보드가 올라오고, 이 글자를 입력칸에 한 글자씩 타이핑해요. (보내지는 않아요)
 //   ['괜찮아?', { erase: 'all' }, '뭐해']처럼 배열로 쓰면 치고·지우고·멈추기를 섞을 수 있어요. (hangul.js의 draftSteps 참고)
-export default function ChatRoom({ messages, partner, date, backTo, hasMore, onDone, instant = false, draft }) {
+// typeSpeed: 키 하나 누르는 간격(ms), 기본 170. 클수록 느려요.
+export default function ChatRoom({ messages, partner, date, backTo, hasMore, onDone, instant = false, draft, typeSpeed }) {
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
   // 재생 없이 한 번에 보여주기 (instant 또는 '동작 줄이기' 설정)
@@ -41,13 +41,15 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
   const done = count >= messages.length
 
   // 키보드 + 타이핑 (draft가 있을 때만)
-  const steps = useMemo(() => (draft ? draftSteps(draft) : []), [draft])
+  const steps = useMemo(() => (draft ? draftSteps(draft, typeSpeed) : []), [draft, typeSpeed])
   const [step, setStep] = useState(reduceMotion ? steps.length : 0)
   const [pressed, setPressed] = useState(null)
   const keyboardUp = Boolean(draft) && started && done
   const typed = step > 0 ? steps[step - 1].text : ''
   const finished = done && step >= steps.length
   const dates = typeof date === 'string' ? { 0: date } : (date ?? {})
+  // 바로 앞 메시지와 보낸 사람이 같고 사이에 날짜 구분선이 없으면 프로필·이름 생략
+  const isContinued = (i) => i > 0 && !dates[i] && messages[i - 1].from === messages[i].from
 
   // 메시지를 하나씩 시간차로 추가
   useEffect(() => {
@@ -67,7 +69,7 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
     const timer = setTimeout(() => {
       setPressed(steps[step].key)
       setStep(step + 1)
-    }, step === 0 ? KEYBOARD_DELAY : (steps[step].delay ?? KEY_INTERVAL))
+    }, step === 0 ? KEYBOARD_DELAY : steps[step].delay)
     return () => clearTimeout(timer)
   }, [keyboardUp, step, steps])
 
@@ -119,10 +121,10 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
         {messages.slice(0, count + 1).map((message, i) => (
           <Fragment key={i}>
             {dates[i] && <DateDivider text={dates[i]} />}
-            {i < count && <ChatBubble message={message} partner={partner} />}
+            {i < count && <ChatBubble message={message} partner={partner} continued={isContinued(i)} />}
           </Fragment>
         ))}
-        {typing && <TypingIndicator partner={partner} />}
+        {typing && <TypingIndicator partner={partner} continued={isContinued(count)} />}
         {finished && hasMore && (
           <motion.p
             initial={{ opacity: 0 }}
@@ -178,10 +180,10 @@ function DateDivider({ text }) {
   return <div className="mx-auto rounded-full bg-black/15 px-3 py-0.5 text-xs text-white">{text}</div>
 }
 
-function TypingIndicator({ partner }) {
+function TypingIndicator({ partner, continued }) {
   return (
     <div className="flex items-end gap-1.5">
-      <Avatar name={partner} />
+      {continued ? <AvatarSpace /> : <Avatar name={partner} />}
       <div className="flex gap-1 rounded-2xl rounded-tl-sm bg-white px-3.5 py-3">
         {[0, 1, 2].map((i) => (
           <motion.span
