@@ -1,9 +1,15 @@
 // 안내 페이지 (/)
 // blocks 종류는 story.js 맨 위 설명을 참고하세요.
+// language { title?, description? }: 채팅 언어(日本語/한국어) 선택. 고른 값이 story의 채팅에 적용돼요.
 export default {
   title: '난바-원 下',
   subtitle: '읽기 전에 아래 내용을 확인해주세요.',
   blocks: [
+    {
+      type: 'language',
+      title: '채팅 언어',
+      description: '이야기 속 LINE 대화를 어떤 언어로 볼지 골라주세요.',
+    },
     {
       type: 'list',
       title: '이용 방법',

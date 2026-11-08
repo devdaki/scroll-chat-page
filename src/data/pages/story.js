@@ -4,7 +4,7 @@
 //   section      { title?, paragraphs: [문단, ...] }   문단 길이·개수 자유. 백틱(`) 안에서 줄을 바꾸면 화면에서도 줄바꿈
 //                문단 안에 *** 만 있는 줄은 가운데 정렬된 장면 구분선으로 보여요
 //   youtube      { videoId, caption?, title? }         videoId = youtube.com/watch?v=여기부분
-//   notification { sender, text, opens?, to?, autoHide?, duration? }  이 위치를 지나면 상단에 LINE 알림
+//   notification { sender, text, ko?, opens?, to?, autoHide?, duration? }  이 위치를 지나면 상단에 LINE 알림
 //                opens: 탭하면 펼칠 채팅방 id. to: 탭하면 이동할 페이지 경로
 //   help         { text }                              가운데 정렬 회색 도움말 (줄바꿈 가능)
 //   list         { title, items: [...], numbered? }     회색 박스 목록 (안내 페이지용)
@@ -19,6 +19,9 @@
 //                       지우기도 섞으려면 배열로: ['괜찮아?', { erase: 'all' }, '뭐해']
 //                       { erase: 3 } 뒤에서 3글자 지우기('all'은 전부), { wait: 800 } 0.8초 멈추기
 //                       { text: '괜찮', speed: 300 } 이 부분만 속도 따로 (erase에도 speed 가능)
+//                       언어별로: { ko: [...], ja: [...] } → 채팅 언어에 맞는 쪽을 그 나라 키보드로 쳐요
+//                       (문자열·배열만 쓰면 한국어 키보드)
+//                       일본어는 히라가나로 치고, 한자로 바꾸려면 { text: 'ご飯は', kana: 'ごはんは' }
 //                typeSpeed: 키 하나 누르는 간격(ms). 기본 170, 클수록 느려요.
 //   chatlist     { rooms, title? }                     전체 화면 LINE 대화 목록 (rooms는 chats.js의 chatLists에서)
 import { chatLists, chats } from '../chats.js'
@@ -279,7 +282,7 @@ export default {
         `동시에 라인 메시지 알림창이 떴다. 발신인은 쿄짱. 그대로 들어가 답장을 남긴다.`,
       ],
     },
-    { type: 'notification', sender: 'きょうちゃん', text: 'さっき会ったばっかなのに、もう会いたいんだけど〜😢', opens: 'kyo' },
+    { type: 'notification', sender: 'きょうちゃん', text: 'さっき会ったばっかなのに、もう会いたいんだけど〜😢', ko: '방금 만났는데 벌써 보고 싶어〜😢', opens: 'kyo' },
     { type: 'help', text: `위에 뜬 알림을 눌러 대화를 확인해보세요.` },
     // 알림을 탭하면 나타나는 채팅방. 대화가 끝나면 아래 블록들이 이어서 나타나요.
     { type: 'chat', id: 'kyo', hidden: true, ...chats.kyo, date: '10월 27일 (월)' },
@@ -317,11 +320,19 @@ export default {
       ...chats.ume,
       instant: true,
       date: { 0: '11. 3. (화)', 1: '11. 5. (목)', 2: '11. 10. (화)', 5: '11. 12. (목)' },
-      draft: [
-        '괜찮', { wait: 1000 }, { erase: 'all' },
-        '그럴줄알', { wait: 1000 },{ erase: 'all' },
-        '밥은', { wait: 1000 }, { erase: 'all' },
-      ],
+      // 채팅 언어에 따라 한국어 / 일본어 키보드로 타이핑
+      draft: {
+        ko: [
+          '괜찮', { wait: 1000 }, { erase: 'all' },
+          '그럴줄알', { wait: 1000 },{ erase: 'all' },
+          '밥은', { wait: 1000 }, { erase: 'all' },
+        ],
+        ja: [
+          { text: '大丈', kana: 'だいじょ' }, { wait: 1000 }, { erase: 'all' },
+          { text: 'だと思', kana: 'だとおも' }, { wait: 1000 }, { erase: 'all' },
+          { text: 'ご飯、食べ', kana: 'ごはん、たべ' }, { wait: 1000 }, { erase: 'all' },
+        ],
+      },
       typeSpeed: 300,
     },
     {

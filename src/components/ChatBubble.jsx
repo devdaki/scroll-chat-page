@@ -1,10 +1,12 @@
 import { motion } from 'motion/react'
+import { useLocalized } from '../context/ChatLanguage.jsx'
 
 // continued: 앞 메시지와 같은 사람이 이어서 보낸 경우 → 프로필·이름 없이 말풍선만
 export default function ChatBubble({ message, partner, continued = false }) {
   const isMe = message.from === 'me'
+  const text = useLocalized()(message)
   // 일본어(히라가나·가타카나 포함)는 한 글자 단위로 줄바꿈, 한국어는 단어 단위로 줄바꿈
-  const isJapanese = /[぀-ヿ]/.test(message.text)
+  const isJapanese = /[぀-ヿ]/.test(text)
 
   return (
     <motion.div
@@ -23,7 +25,7 @@ export default function ChatBubble({ message, partner, continued = false }) {
             isMe ? 'rounded-tr-sm bg-line-sent' : 'rounded-tl-sm bg-white'
           }`}
         >
-          {message.text}
+          {text}
         </p>
       </div>
 

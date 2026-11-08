@@ -1,3 +1,5 @@
+import { useLocalized } from '../context/ChatLanguage.jsx'
+
 // 전체 화면 LINE 대화 목록. 페이지 스크롤로 목록이 올라가고,
 // 상단 헤더·검색창과 하단 탭바는 목록 안에서만 고정돼요.
 // rooms: [{ name, text, time, unread?, pinned?, muted?, opens? }]
@@ -45,6 +47,7 @@ export default function ChatList({ title = '대화', rooms, onOpen }) {
 }
 
 function ChatListItem({ room, onOpen }) {
+  const text = useLocalized()(room)
   const content = (
     <>
       <ListAvatar name={room.name} />
@@ -53,7 +56,7 @@ function ChatListItem({ room, onOpen }) {
           <span className="truncate text-[16px] font-semibold">{room.name}</span>
           {room.muted && <span className="shrink-0 text-xs text-neutral-400">🔕</span>}
         </div>
-        <p className="line-clamp-2 text-[13px] leading-snug text-neutral-500">{room.text}</p>
+        <p className="line-clamp-2 text-[13px] leading-snug text-neutral-500">{text}</p>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1 self-start pt-0.5">
         <span className="text-[11px] text-neutral-400">{room.time}</span>

@@ -3,7 +3,8 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/rea
 import { useNavigate } from 'react-router'
 import ChatBubble, { Avatar, AvatarSpace } from './ChatBubble.jsx'
 import Keyboard from './Keyboard.jsx'
-import { draftSteps } from './hangul.js'
+import { draftSteps, pickDraft } from './draft.js'
+import { useChatLanguage } from '../context/ChatLanguage.jsx'
 
 // 메시지 사이 간격: 기본 대기 + 글자 수만큼 '입력 중' 시간
 const delayFor = (message) => 700 + message.text.length * 60
@@ -19,7 +20,8 @@ const KEYBOARD_DELAY = 900
 // backTo: 뒤로 버튼을 눌렀을 때 갈 경로. 없으면 버튼은 모양만 있어요.
 // instant: true면 재생 없이 처음부터 전체 대화가 다 보여요.
 // draft: 대화가 끝나면 키보드가 올라오고, 이 글자를 입력칸에 한 글자씩 타이핑해요. (보내지는 않아요)
-//   ['괜찮아?', { erase: 'all' }, '뭐해']처럼 배열로 쓰면 치고·지우고·멈추기를 섞을 수 있어요. (hangul.js의 draftSteps 참고)
+//   ['괜찮아?', { erase: 'all' }, '뭐해']처럼 배열로 쓰면 치고·지우고·멈추기를 섞을 수 있어요.
+//   { ko: [...], ja: [...] }로 쓰면 채팅 언어에 맞는 쪽을 그 언어 키보드로 쳐요. (draft.js 참고)
 // typeSpeed: 키 하나 누르는 간격(ms), 기본 170. 클수록 느려요.
 export default function ChatRoom({ messages, partner, date, backTo, hasMore, onDone, instant = false, draft, typeSpeed }) {
   const navigate = useNavigate()
@@ -41,11 +43,22 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
   const done = count >= messages.length
 
   // 키보드 + 타이핑 (draft가 있을 때만)
-  const steps = useMemo(() => (draft ? draftSteps(draft, typeSpeed) : []), [draft, typeSpeed])
+  const { language } = useChatLanguage()
+  const picked = pickDraft(draft, language)
+  const steps = useMemo(
+    () => (picked ? draftSteps(picked.items, typeSpeed, picked.lang) : []),
+    [picked?.items, picked?.lang, typeSpeed]
+  )
   const [step, setStep] = useState(reduceMotion ? steps.length : 0)
   const [pressed, setPressed] = useState(null)
-  const keyboardUp = Boolean(draft) && started && done
-  const typed = step > 0 ? steps[step - 1].text : ''
+  const keyboardUp = Boolean(picked) && started && done
+  const current = step > 0 ? steps[step - 1] : null
+  const typed = current?.text ?? ''
+  // 일본어: 끝에서 composing 글자만큼은 확정 전이라 밑줄
+  const composingLength = current?.composing ?? 0
+  const typedChars = [...typed]
+  const fixedText = typedChars.slice(0, typedChars.length - composingLength).join('')
+  const composingText = typedChars.slice(typedChars.length - composingLength).join('')
   const finished = done && step >= steps.length
   const dates = typeof date === 'string' ? { 0: date } : (date ?? {})
   // 바로 앞 메시지와 보낸 사람이 같고 사이에 날짜 구분선이 없으면 프로필·이름 생략
@@ -147,7 +160,12 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
         >
           <span className="text-2xl leading-none">+</span>
           <div className="flex flex-1 items-center rounded-full bg-neutral-100 px-4 py-2 text-sm">
-            {typed && <span className="text-neutral-900">{typed}</span>}
+            {typed && (
+              <span className="text-neutral-900">
+                {fixedText}
+                {composingText && <span className="underline underline-offset-4">{composingText}</span>}
+              </span>
+            )}
             {keyboardUp && <span className="ml-px h-4 w-0.5 animate-pulse bg-[#06c755]" />}
             {!typed && <span className={keyboardUp ? 'ml-1' : ''}>메시지 입력</span>}
           </div>
@@ -166,7 +184,7 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
               onAnimationComplete={scrollToBottom}
               className="overflow-hidden"
             >
-              <Keyboard pressed={pressed} />
+              <Keyboard layout={picked.lang} pressed={pressed} candidates={current?.candidates} />
             </motion.div>
           )}
         </AnimatePresence>

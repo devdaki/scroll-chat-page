@@ -5,6 +5,8 @@ import LineNotification from './LineNotification.jsx'
 import GuideList from './GuideList.jsx'
 import ChatRoom from './ChatRoom.jsx'
 import ChatList from './ChatList.jsx'
+import LanguagePicker from './LanguagePicker.jsx'
+import { useLocalized } from '../context/ChatLanguage.jsx'
 
 // data/pages/*.js의 blocks 배열을 순서대로 화면에 그려요.
 // 채팅방은 화면 너비 전체를 쓰고, 나머지 블록은 본문 폭(좌우 여백 포함) 안에 들어가요.
@@ -70,6 +72,8 @@ export default function Blocks({ blocks }) {
 }
 
 function Block({ block, hasMore, reveal, onDone }) {
+  const localized = useLocalized()
+
   switch (block.type) {
     case 'section':
       return (
@@ -88,7 +92,7 @@ function Block({ block, hasMore, reveal, onDone }) {
       return (
         <LineNotification
           sender={block.sender}
-          text={block.text}
+          text={localized(block)}
           to={block.to}
           onOpen={block.opens ? () => reveal(block.opens) : undefined}
           autoHide={block.autoHide}
@@ -99,6 +103,8 @@ function Block({ block, hasMore, reveal, onDone }) {
       return <p className="py-6 text-center text-sm leading-relaxed whitespace-pre-line text-neutral-400">{block.text}</p>
     case 'list':
       return <GuideList title={block.title} items={block.items} numbered={block.numbered} />
+    case 'language':
+      return <LanguagePicker title={block.title} description={block.description} />
     case 'chatlist':
       return <ChatList title={block.title} rooms={block.rooms} onOpen={reveal} />
     case 'chat': {
