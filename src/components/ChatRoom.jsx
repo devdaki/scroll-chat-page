@@ -1,10 +1,15 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
-import { motion, useInView, useReducedMotion } from 'motion/react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
 import { useNavigate } from 'react-router'
 import ChatBubble, { Avatar } from './ChatBubble.jsx'
+import Keyboard from './Keyboard.jsx'
+import { draftSteps } from './hangul.js'
 
 // 메시지 사이 간격: 기본 대기 + 글자 수만큼 '입력 중' 시간
 const delayFor = (message) => 700 + message.text.length * 60
+// 키보드가 올라온 뒤 타이핑 시작까지, 키 하나 누르는 간격
+const KEYBOARD_DELAY = 900
+const KEY_INTERVAL = 170
 
 // 전체 화면 LINE 채팅방. 채팅방 최상단이 화면 맨 위에 닿으면 재생을 시작해서
 // 메시지가 시간차로 하나씩 도착하고,
@@ -13,13 +18,19 @@ const delayFor = (message) => 700 + message.text.length * 60
 // date: 날짜 구분선. 문자열 하나면 맨 위에만,
 //   { 0: '10월 26일 (일)', 6: '10월 27일 (월)' }처럼 쓰면 해당 번호(0부터) 메시지 바로 앞에 나와요.
 // backTo: 뒤로 버튼을 눌렀을 때 갈 경로. 없으면 버튼은 모양만 있어요.
-export default function ChatRoom({ messages, partner, date, backTo, hasMore, onDone }) {
+// instant: true면 재생 없이 처음부터 전체 대화가 다 보여요.
+// draft: 대화가 끝나면 키보드가 올라오고, 이 글자를 입력칸에 한 글자씩 타이핑해요. (보내지는 않아요)
+//   ['괜찮아?', { erase: 'all' }, '뭐해']처럼 배열로 쓰면 치고·지우고·멈추기를 섞을 수 있어요. (hangul.js의 draftSteps 참고)
+export default function ChatRoom({ messages, partner, date, backTo, hasMore, onDone, instant = false, draft }) {
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
-  const [count, setCount] = useState(reduceMotion ? messages.length : 0)
+  // 재생 없이 한 번에 보여주기 (instant 또는 '동작 줄이기' 설정)
+  const showAll = instant || reduceMotion
+  const [count, setCount] = useState(showAll ? messages.length : 0)
   const [typing, setTyping] = useState(false)
   const roomRef = useRef(null)
   const bottomRef = useRef(null)
+  const barRef = useRef(null)
   const endRef = useRef(null)
   // 화면 맨 위 1% 띠에 채팅방이 들어오면 시작
   const reachedTop = useInView(roomRef, { once: true, margin: '0px 0px -99% 0px' })
@@ -28,6 +39,14 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
   const reachedEnd = useInView(endRef, { once: true })
   const started = reachedTop || reachedEnd
   const done = count >= messages.length
+
+  // 키보드 + 타이핑 (draft가 있을 때만)
+  const steps = useMemo(() => (draft ? draftSteps(draft) : []), [draft])
+  const [step, setStep] = useState(reduceMotion ? steps.length : 0)
+  const [pressed, setPressed] = useState(null)
+  const keyboardUp = Boolean(draft) && started && done
+  const typed = step > 0 ? steps[step - 1].text : ''
+  const finished = done && step >= steps.length
   const dates = typeof date === 'string' ? { 0: date } : (date ?? {})
 
   // 메시지를 하나씩 시간차로 추가
@@ -42,20 +61,40 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
     return () => clearTimeout(timer)
   }, [started, count, done])
 
-  // 대화가 끝나면 알림
+  // 키보드가 올라오면 잠깐 뒤에 한 키씩 타이핑
+  useEffect(() => {
+    if (!keyboardUp || step >= steps.length) return
+    const timer = setTimeout(() => {
+      setPressed(steps[step].key)
+      setStep(step + 1)
+    }, step === 0 ? KEYBOARD_DELAY : (steps[step].delay ?? KEY_INTERVAL))
+    return () => clearTimeout(timer)
+  }, [keyboardUp, step, steps])
+
+  // 눌린 키 표시는 잠깐만
+  useEffect(() => {
+    if (!pressed) return
+    const timer = setTimeout(() => setPressed(null), 100)
+    return () => clearTimeout(timer)
+  }, [pressed, step])
+
+  // 대화(와 타이핑)가 끝나면 알림
   const onDoneRef = useRef(onDone)
   onDoneRef.current = onDone
   useEffect(() => {
-    if (done) onDoneRef.current?.()
-  }, [done])
+    if (finished) onDoneRef.current?.()
+  }, [finished])
 
-  // 새 메시지가 화면 아래로 가려지면 맨 아래로 (위로 끌어올리지는 않음)
-  useEffect(() => {
+  // 마지막 메시지가 하단 입력창·키보드에 가려지면 그만큼 내리기 (위로 끌어올리지는 않음)
+  const scrollToBottom = () => {
     const el = bottomRef.current
     if (!started || !el) return
-    if (el.getBoundingClientRect().bottom > window.innerHeight - 80) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'end' })
-    }
+    const visibleBottom = window.innerHeight - (barRef.current?.offsetHeight ?? 0) - 12
+    const hidden = el.getBoundingClientRect().bottom - visibleBottom
+    if (hidden > 0) window.scrollBy({ top: hidden, behavior: 'smooth' })
+  }
+  useEffect(() => {
+    if (!showAll) scrollToBottom()
   }, [started, count, typing])
 
   // 채팅방: 페이지 전체 스크롤을 쓰고, 헤더와 입력창은 채팅방 안에서만 고정
@@ -84,7 +123,7 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
           </Fragment>
         ))}
         {typing && <TypingIndicator partner={partner} />}
-        {done && hasMore && (
+        {finished && hasMore && (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -94,14 +133,41 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
             아래로 스크롤해서 계속 읽기 ↓
           </motion.p>
         )}
-        <div ref={bottomRef} className="scroll-mb-20" />
+        <div ref={bottomRef} />
       </div>
 
-      {/* 하단 입력창 (모양만) */}
-      <div className="sticky bottom-0 flex items-center gap-3 bg-white px-3 pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] text-neutral-400">
-        <span className="text-2xl leading-none">+</span>
-        <div className="flex-1 rounded-full bg-neutral-100 px-4 py-2 text-sm">메시지 입력</div>
-        <span className="text-lg">☺</span>
+      {/* 하단 입력창 (모양만) + draft가 있으면 키보드 */}
+      <div ref={barRef} className="sticky bottom-0">
+        <div
+          className={`flex items-center gap-3 bg-white px-3 pt-2 text-neutral-400 ${
+            keyboardUp ? 'pb-2' : 'pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)]'
+          }`}
+        >
+          <span className="text-2xl leading-none">+</span>
+          <div className="flex flex-1 items-center rounded-full bg-neutral-100 px-4 py-2 text-sm">
+            {typed && <span className="text-neutral-900">{typed}</span>}
+            {keyboardUp && <span className="ml-px h-4 w-0.5 animate-pulse bg-[#06c755]" />}
+            {!typed && <span className={keyboardUp ? 'ml-1' : ''}>메시지 입력</span>}
+          </div>
+          {typed ? (
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#06c755] text-sm text-white">➤</span>
+          ) : (
+            <span className="text-lg">☺</span>
+          )}
+        </div>
+        <AnimatePresence>
+          {keyboardUp && (
+            <motion.div
+              initial={reduceMotion ? false : { height: 0 }}
+              animate={{ height: 'auto' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 34 }}
+              onAnimationComplete={scrollToBottom}
+              className="overflow-hidden"
+            >
+              <Keyboard pressed={pressed} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <div ref={endRef} aria-hidden="true" />
     </div>

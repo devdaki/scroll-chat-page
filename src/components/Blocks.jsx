@@ -98,6 +98,8 @@ function Block({ block, hasMore, reveal, onDone }) {
           partner={block.partner}
           date={block.date}
           backTo={block.backTo}
+          instant={block.instant}
+          draft={block.draft}
           hasMore={hasMore}
           onDone={onDone}
         />
