@@ -1,8 +1,7 @@
 // 안내 페이지 (/)
 // blocks 종류는 story.js 맨 위 설명을 참고하세요.
 export default {
-  eyebrow: 'Story',
-  title: '여기에 페이지 제목이 들어갑니다',
+  title: '난바-원 下',
   subtitle: '읽기 전에 아래 내용을 확인해주세요.',
   blocks: [
     {

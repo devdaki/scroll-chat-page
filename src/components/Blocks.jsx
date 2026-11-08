@@ -12,6 +12,14 @@ import ChatList from './ChatList.jsx'
 // 채팅방 뒤에 오는 블록들은 그 대화가 끝날 때까지 나타나지 않아요.
 // hidden 채팅방은 알림(또는 대화 목록)을 탭해야 나타나고, 그 전까지는 뒤 블록들도 숨겨져요.
 
+// 문단 안에서 *** 만 있는 줄 = 장면 구분선 (가운데 정렬)
+const SCENE_BREAK = '***'
+const splitSceneBreaks = (text) =>
+  text
+    .split(/^[ \t]*(\*\*\*)[ \t]*$/m)
+    .map((part) => part.replace(/^\n+|\n+$/g, ''))
+    .filter(Boolean)
+
 // 화면 너비 전체를 쓰는 블록
 const FULL_WIDTH = ['chat', 'chatlist']
 
@@ -67,9 +75,11 @@ function Block({ block, hasMore, reveal, onDone }) {
       return (
         <Section title={block.title}>
           {/* 백틱 안에서 줄을 바꾸면 화면에서도 줄바꿈 (줄 앞 들여쓰기는 무시) */}
-          {block.paragraphs.map((text, i) => (
-            <p key={i} className="whitespace-pre-line">{text}</p>
-          ))}
+          {block.paragraphs.flatMap((text, i) => splitSceneBreaks(text).map((part, j) => (
+            <p key={`${i}-${j}`} className={part === SCENE_BREAK ? 'text-center tracking-[0.3em]' : 'whitespace-pre-line'}>
+              {part}
+            </p>
+          )))}
         </Section>
       )
     case 'youtube':
