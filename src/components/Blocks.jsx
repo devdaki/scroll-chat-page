@@ -60,7 +60,7 @@ export default function Blocks({ blocks }) {
 
   return groups.map((group, i) =>
     Array.isArray(group) ? (
-      <div key={`g${group[0].key}`} className="mx-auto max-w-md px-5">
+      <div key={`g${group[0].key}`} className="mx-auto w-full max-w-md px-5">
         {group.map(render)}
       </div>
     ) : (
