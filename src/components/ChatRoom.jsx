@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/rea
 import { useNavigate } from 'react-router'
 import ChatBubble, { Avatar, AvatarSpace } from './ChatBubble.jsx'
 import Keyboard from './Keyboard.jsx'
+import IncomingNotifications from './IncomingNotifications.jsx'
 import { draftSteps, pickDraft } from './draft.js'
 import { useChatLanguage } from '../context/ChatLanguage.jsx'
 
@@ -23,8 +24,9 @@ const KEYBOARD_DELAY = 900
 //   ['괜찮아?', { erase: 'all' }, '뭐해']처럼 배열로 쓰면 치고·지우고·멈추기를 섞을 수 있어요.
 //   { ko: [...], ja: [...] }로 쓰면 채팅 언어에 맞는 쪽을 그 언어 키보드로 쳐요. (draft.js 참고)
 // typeSpeed: 키 하나 누르는 간격(ms), 기본 170. 클수록 느려요.
+// incoming: { messages: [{ sender, text, ko? }], interval? } 채팅방을 보는 동안 다른 사람 알림이 차례로 떠요. (누를 수 없음)
 // read: 내 메시지 읽음 표시 기본값 (true / false / 숫자). 메시지마다 read로 따로 정할 수도 있어요.
-export default function ChatRoom({ messages, partner, date, backTo, hasMore, onDone, instant = false, draft, typeSpeed, read = true }) {
+export default function ChatRoom({ messages, partner, date, backTo, hasMore, onDone, instant = false, draft, typeSpeed, read = true, incoming }) {
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
   // 재생 없이 한 번에 보여주기 (instant 또는 '동작 줄이기' 설정)
@@ -41,6 +43,8 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
   // 채팅방 끝까지 화면에 들어오면 시작
   const reachedEnd = useInView(endRef, { once: true })
   const started = reachedTop || reachedEnd
+  // 채팅방이 지금 화면에 보이는지 (incoming 알림 일시정지용)
+  const inView = useInView(roomRef)
   const done = count >= messages.length
 
   // 키보드 + 타이핑 (draft가 있을 때만)
@@ -116,6 +120,7 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
   // 채팅방: 페이지 전체 스크롤을 쓰고, 헤더와 입력창은 채팅방 안에서만 고정
   return (
     <div ref={roomRef} className="mx-auto flex min-h-dvh max-w-md flex-col bg-line-bg">
+      {incoming && <IncomingNotifications messages={incoming.messages} interval={incoming.interval} playing={started && inView} />}
       {/* 상단 헤더 */}
       <header className="sticky top-0 z-10 flex items-center gap-3 bg-line-header px-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 text-white">
         {backTo ? (

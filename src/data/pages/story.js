@@ -9,7 +9,7 @@
 //                opens: 탭하면 펼칠 채팅방 id. to: 탭하면 이동할 페이지 경로
 //   help         { text }                              가운데 정렬 회색 도움말 (줄바꿈 가능)
 //   list         { title, items: [...], numbered? }     회색 박스 목록 (안내 페이지용)
-//   chat         { messages, partner, date?, id?, hidden?, backTo?, instant?, draft?, typeSpeed?, read? }  전체 화면 채팅방.
+//   chat         { messages, partner, date?, id?, hidden?, backTo?, instant?, draft?, typeSpeed?, read?, incoming? }  전체 화면 채팅방.
 //                date: '10월 27일 (월)'이면 맨 위에 하나, 여러 개는 { 0: '10월 26일 (일)', 6: '10월 27일 (월)' }
 //                      (숫자 = 몇 번째 메시지 앞에 넣을지, 0부터 셈)
 //                채팅방 뒤에 오는 블록들은 대화가 끝난 뒤에 나타나요.
@@ -25,6 +25,8 @@
 //                       (문자열·배열만 쓰면 한국어 키보드)
 //                       일본어는 히라가나로 치고, 한자로 바꾸려면 { text: 'ご飯は', kana: 'ごはんは' }
 //                typeSpeed: 키 하나 누르는 간격(ms). 기본 170, 클수록 느려요.
+//                incoming: { interval?, messages: [{ sender, text, ko? }] } 채팅방을 보는 동안 다른 사람 알림이
+//                          interval(ms, 기본 2000)마다 하나씩 떠요. 누를 수 없고, 다 나오면 끝.
 //   chatlist     { rooms, title? }                     전체 화면 LINE 대화 목록 (rooms는 chats.js의 chatLists에서)
 import { chatLists, chats } from '../chats.js'
 export default {
@@ -340,6 +342,20 @@ export default {
         ],
       },
       typeSpeed: 500,
+      // 채팅방을 보는 동안 2초마다 다른 사람들의 알림 (누를 수 없음)
+      incoming: {
+        interval: 3000,
+        messages: [
+          { sender: 'ヒカリちゃん♥', text: 'なんで返信がこんなに遅いんだ？', ko: '왜 이렇게 답장이 늦어?' },
+          { sender: 'ユナちゃん♥', text: 'トアちゃん、今日会える？', ko: '토아짱, 오늘 만날 수 있어?' },
+          { sender: 'キリちゃん🤍', text: 'トアはバカだね😍', ko: '토아는 바보네😍' },
+          { sender: 'トッちゃん♥', text: '君、今何してるの？', ko: '너 지금 뭐 해?' },
+          { sender: 'アヤちゃん🫶', text: '私にだけ返信してくれないの？', ko: '나한테만 답장 안 해주는 거야?' },
+          { sender: 'リナち♥', text: '君、嫌い！', ko: '너 싫어!' },
+          { sender: 'サキ😍', text: '忙しいのかな？', ko: '바쁜가?' },
+          { sender: 'マユち😻', text: '会いたい♡', ko: '보고 싶어♡' },
+        ],
+      },
     },
     {
       type: 'section',

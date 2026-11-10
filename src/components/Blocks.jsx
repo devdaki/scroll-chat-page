@@ -126,6 +126,7 @@ function Block({ block, hasMore, reveal, onDone }) {
           backTo={block.backTo}
           instant={block.instant}
           read={block.read}
+          incoming={block.incoming}
           draft={block.draft}
           typeSpeed={block.typeSpeed}
           hasMore={hasMore}

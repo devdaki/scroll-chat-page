@@ -60,23 +60,30 @@ export default function LineNotification({ sender, text, autoHide = false, durat
             onClick={handleClick}
             className={`fixed inset-x-0 top-0 z-50 mx-auto max-w-md px-2 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] ${to || onOpen ? 'cursor-pointer' : ''}`}
           >
-            <div className="flex items-center gap-3 rounded-[1.4rem] bg-white/75 p-3 shadow-lg ring-1 ring-black/5 backdrop-blur-xl">
-              {/* LINE 앱 아이콘 */}
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.65rem] bg-[#06c755] text-[10px] font-black tracking-tight text-white">
-                LINE
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="truncate text-[15px] font-semibold">{sender}</span>
-                  <span className="shrink-0 text-xs text-neutral-500">지금</span>
-                </div>
-                <p className="truncate text-[15px] leading-snug text-neutral-800">{text}</p>
-              </div>
-            </div>
+            <NotificationCard sender={sender} text={text} />
           </motion.div>
         )}
       </AnimatePresence>
     </>
+  )
+}
+
+// 알림 배너 모양 (IncomingNotifications에서도 같이 써요)
+export function NotificationCard({ sender, text }) {
+  return (
+    <div className="flex items-center gap-3 rounded-[1.4rem] bg-white/75 p-3 shadow-lg ring-1 ring-black/5 backdrop-blur-xl">
+      {/* LINE 앱 아이콘 */}
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.65rem] bg-[#06c755] text-[10px] font-black tracking-tight text-white">
+        LINE
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="truncate text-[15px] font-semibold">{sender}</span>
+          <span className="shrink-0 text-xs text-neutral-500">지금</span>
+        </div>
+        <p className="truncate text-[15px] leading-snug text-neutral-800">{text}</p>
+      </div>
+    </div>
   )
 }

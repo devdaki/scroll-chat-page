@@ -35,7 +35,7 @@ export default function ChatList({ title = '대화', rooms, onOpen }) {
         aria-hidden="true"
         className="sticky bottom-0 grid grid-cols-5 border-t border-neutral-200 bg-white pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] text-center text-[10px] text-neutral-400"
       >
-        {['홈', '대화', 'VOOM', '뉴스', '지갑'].map((tab) => (
+        {['홈', '대화', 'shopping', '뉴스', 'Apps'].map((tab) => (
           <span key={tab} className={tab === '대화' ? 'font-bold text-neutral-900' : ''}>
             <span className="mx-auto mb-1 block h-5 w-5 rounded-md border-2 border-current" />
             {tab}
