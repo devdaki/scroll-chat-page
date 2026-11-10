@@ -1,10 +1,12 @@
 import { motion } from 'motion/react'
-import { useLocalized } from '../context/ChatLanguage.jsx'
+import { useChatLanguage, useLocalized } from '../context/ChatLanguage.jsx'
 
 // continued: 앞 메시지와 같은 사람이 이어서 보낸 경우 → 프로필·이름 없이 말풍선만
-export default function ChatBubble({ message, partner, continued = false }) {
+// read: 내 메시지 옆 읽음 표시. true = 읽음, false = 표시 없음, 숫자 = 읽은 사람 수 (단체방, 예: 읽음 3)
+export default function ChatBubble({ message, partner, continued = false, read = true }) {
   const isMe = message.from === 'me'
   const text = useLocalized()(message)
+  const { language } = useChatLanguage()
   // 일본어(히라가나·가타카나 포함)는 한 글자 단위로 줄바꿈, 한국어는 단어 단위로 줄바꿈
   const isJapanese = /[぀-ヿ]/.test(text)
 
@@ -30,7 +32,12 @@ export default function ChatBubble({ message, partner, continued = false }) {
       </div>
 
       <div className={`flex shrink-0 flex-col text-[10px] leading-tight text-line-meta ${isMe ? 'items-end' : 'items-start'}`}>
-        {isMe && <span>읽음</span>}
+        {isMe && read !== false && (
+          <span>
+            {language === 'ja' ? '既読' : '읽음'}
+            {typeof read === 'number' && ` ${read}`}
+          </span>
+        )}
         <span>{message.time}</span>
       </div>
     </motion.div>

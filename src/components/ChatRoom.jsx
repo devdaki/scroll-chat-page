@@ -23,7 +23,8 @@ const KEYBOARD_DELAY = 900
 //   ['괜찮아?', { erase: 'all' }, '뭐해']처럼 배열로 쓰면 치고·지우고·멈추기를 섞을 수 있어요.
 //   { ko: [...], ja: [...] }로 쓰면 채팅 언어에 맞는 쪽을 그 언어 키보드로 쳐요. (draft.js 참고)
 // typeSpeed: 키 하나 누르는 간격(ms), 기본 170. 클수록 느려요.
-export default function ChatRoom({ messages, partner, date, backTo, hasMore, onDone, instant = false, draft, typeSpeed }) {
+// read: 내 메시지 읽음 표시 기본값 (true / false / 숫자). 메시지마다 read로 따로 정할 수도 있어요.
+export default function ChatRoom({ messages, partner, date, backTo, hasMore, onDone, instant = false, draft, typeSpeed, read = true }) {
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
   // 재생 없이 한 번에 보여주기 (instant 또는 '동작 줄이기' 설정)
@@ -134,7 +135,7 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
         {messages.slice(0, count + 1).map((message, i) => (
           <Fragment key={i}>
             {dates[i] && <DateDivider text={dates[i]} />}
-            {i < count && <ChatBubble message={message} partner={partner} continued={isContinued(i)} />}
+            {i < count && <ChatBubble message={message} partner={partner} continued={isContinued(i)} read={message.read ?? read} />}
           </Fragment>
         ))}
         {typing && <TypingIndicator partner={partner} continued={isContinued(count)} />}

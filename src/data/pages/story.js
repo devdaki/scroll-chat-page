@@ -9,12 +9,13 @@
 //                opens: 탭하면 펼칠 채팅방 id. to: 탭하면 이동할 페이지 경로
 //   help         { text }                              가운데 정렬 회색 도움말 (줄바꿈 가능)
 //   list         { title, items: [...], numbered? }     회색 박스 목록 (안내 페이지용)
-//   chat         { messages, partner, date?, id?, hidden?, backTo?, instant?, draft?, typeSpeed? }  전체 화면 채팅방.
+//   chat         { messages, partner, date?, id?, hidden?, backTo?, instant?, draft?, typeSpeed?, read? }  전체 화면 채팅방.
 //                date: '10월 27일 (월)'이면 맨 위에 하나, 여러 개는 { 0: '10월 26일 (일)', 6: '10월 27일 (월)' }
 //                      (숫자 = 몇 번째 메시지 앞에 넣을지, 0부터 셈)
 //                채팅방 뒤에 오는 블록들은 대화가 끝난 뒤에 나타나요.
 //                hidden: true면 처음엔 안 보이다가, opens에 이 id를 적은 알림을 탭하면 나타나요.
 //                backTo가 없으면 뒤로 버튼은 모양만 있어요.
+//                read: 내 메시지 읽음 표시. false면 전부 안 읽음, 숫자면 '읽음 3'처럼 (메시지마다 read로 따로 설정 가능)
 //                instant: true면 하나씩 재생하지 않고 전체 대화가 처음부터 다 보여요.
 //                draft: '괜찮아?'처럼 쓰면 대화가 끝난 뒤 키보드가 올라오고 입력칸에 그 글자를 타이핑해요.
 //                       지우기도 섞으려면 배열로: ['괜찮아?', { erase: 'all' }, '뭐해']
