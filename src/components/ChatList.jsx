@@ -1,4 +1,13 @@
+import { House, LayoutGrid, MessageCircle, Newspaper, ShoppingBag } from 'lucide-react'
 import { useLocalized } from '../context/ChatLanguage.jsx'
+
+const TABS = [
+  { label: '홈', Icon: House },
+  { label: '대화', Icon: MessageCircle },
+  { label: 'shopping', Icon: ShoppingBag },
+  { label: '뉴스', Icon: Newspaper },
+  { label: 'Apps', Icon: LayoutGrid },
+]
 
 // 전체 화면 LINE 대화 목록. 페이지 스크롤로 목록이 올라가고,
 // 상단 헤더·검색창과 하단 탭바는 목록 안에서만 고정돼요.
@@ -35,10 +44,10 @@ export default function ChatList({ title = '대화', rooms, onOpen }) {
         aria-hidden="true"
         className="sticky bottom-0 grid grid-cols-5 border-t border-neutral-200 bg-white pt-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] text-center text-[10px] text-neutral-400"
       >
-        {['홈', '대화', 'shopping', '뉴스', 'Apps'].map((tab) => (
-          <span key={tab} className={tab === '대화' ? 'font-bold text-neutral-900' : ''}>
-            <span className="mx-auto mb-1 block h-5 w-5 rounded-md border-2 border-current" />
-            {tab}
+        {TABS.map(({ label, Icon }) => (
+          <span key={label} className={label === '대화' ? 'font-bold text-neutral-900' : ''}>
+            <Icon className="mx-auto mb-1 h-5.5 w-5.5" strokeWidth={label === '대화' ? 2.4 : 1.8} />
+            {label}
           </span>
         ))}
       </nav>
