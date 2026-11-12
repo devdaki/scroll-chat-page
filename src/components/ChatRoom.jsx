@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
 import { useNavigate } from 'react-router'
+import { ChevronLeft, Menu, Plus, Search, SendHorizontal, Smile } from 'lucide-react'
 import ChatBubble, { Avatar, AvatarSpace } from './ChatBubble.jsx'
 import Keyboard from './Keyboard.jsx'
 import IncomingNotifications from './IncomingNotifications.jsx'
@@ -124,14 +125,17 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
       {/* 상단 헤더 */}
       <header className="sticky top-0 z-10 flex items-center gap-3 bg-line-header px-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-3 text-white">
         {backTo ? (
-          <button type="button" onClick={() => navigate(backTo)} aria-label="뒤로" className="-ml-1 px-1 text-2xl leading-none">
-            ‹
+          <button type="button" onClick={() => navigate(backTo)} aria-label="뒤로" className="-ml-2">
+            <ChevronLeft className="h-7 w-7" strokeWidth={2} />
           </button>
         ) : (
-          <span aria-hidden="true" className="-ml-1 px-1 text-2xl leading-none">‹</span>
+          <ChevronLeft aria-hidden="true" className="-ml-2 h-7 w-7" strokeWidth={2} />
         )}
         <span className="flex-1 text-[17px] font-semibold">{partner}</span>
-        <span className="text-sm tracking-widest">⌕ ☰</span>
+        <span aria-hidden="true" className="flex gap-4">
+          <Search className="h-5.5 w-5.5" strokeWidth={2} />
+          <Menu className="h-5.5 w-5.5" strokeWidth={2} />
+        </span>
       </header>
 
       {/* 대화 영역 */}
@@ -164,7 +168,7 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
             keyboardUp ? 'pb-2' : 'pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)]'
           }`}
         >
-          <span className="text-2xl leading-none">+</span>
+          <Plus className="h-6.5 w-6.5 shrink-0" strokeWidth={1.8} />
           <div className="flex flex-1 items-center rounded-full bg-neutral-100 px-4 py-2 text-sm">
             {typed && (
               <span className="text-neutral-900">
@@ -176,9 +180,11 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
             {!typed && <span className={keyboardUp ? 'ml-1' : ''}>메시지 입력</span>}
           </div>
           {typed ? (
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#06c755] text-sm text-white">➤</span>
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#06c755] text-white">
+              <SendHorizontal className="h-4 w-4" strokeWidth={2.2} />
+            </span>
           ) : (
-            <span className="text-lg">☺</span>
+            <Smile className="h-6 w-6 shrink-0" strokeWidth={1.8} />
           )}
         </div>
         <AnimatePresence>

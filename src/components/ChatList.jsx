@@ -1,4 +1,4 @@
-import { House, LayoutGrid, MessageCircle, Newspaper, ShoppingBag } from 'lucide-react'
+import { Ellipsis, House, LayoutGrid, MessageCircle, Newspaper, Search, ShoppingBag, SquarePen } from 'lucide-react'
 import { useLocalized } from '../context/ChatLanguage.jsx'
 
 const TABS = [
@@ -21,13 +21,13 @@ export default function ChatList({ title = '대화', rooms, onOpen }) {
       <header className="sticky top-0 z-10 bg-white px-4 pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-2">
         <div className="flex items-center justify-between">
           <h2 className="text-[22px] font-bold">{title}</h2>
-          <span aria-hidden="true" className="flex gap-4 text-lg text-neutral-700">
-            <span>⋯</span>
-            <span>✎</span>
+          <span aria-hidden="true" className="flex gap-4 text-neutral-700">
+            <Ellipsis className="h-5.5 w-5.5" strokeWidth={1.8} />
+            <SquarePen className="h-5.5 w-5.5" strokeWidth={1.8} />
           </span>
         </div>
         <div className="mt-3 flex items-center gap-2 rounded-lg bg-neutral-100 px-3 py-2 text-sm text-neutral-400">
-          <span aria-hidden="true">⌕</span>
+          <Search aria-hidden="true" className="h-4 w-4" strokeWidth={2} />
           검색
         </div>
       </header>
