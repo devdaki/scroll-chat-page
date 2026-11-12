@@ -6,6 +6,7 @@ import { umeProfile, mobProfile1, mobProfile2, mobProfile3, mobProfile4, mobProf
 // avatar: 프로필 사진 (images.js에서 import, 없으면 이름 첫 글자)
 // messages: 위에서부터 순서대로 하나씩 도착해요.
 //   from: 'me' = 오른쪽 초록 말풍선, 'them' = 왼쪽 흰 말풍선
+//   typing: (내 메시지) true면 그 차례에 키보드로 친 뒤 전송. 한자는 { ja: [..., { text: '俺', kana: 'おれ' }] } 형식 (draft와 같음)
 //   read: (내 메시지) 읽음 표시. false = 안 읽음(표시 없음), 숫자 = 읽은 사람 수. 안 적으면 채팅방 설정(기본 읽음)
 //   text: 일본어, ko: 한국어 (안내 페이지에서 고른 채팅 언어로 보여요. ko가 없으면 text 그대로)
 export const chats = {
@@ -14,7 +15,11 @@ export const chats = {
     avatar: mobProfile1,
     messages: [
       { from: 'them', text: 'さっき会ったばっかなのに、もう会いたいんだけど〜😢', ko: '방금 만났는데 벌써 보고 싶어〜😢', time: '오후 5:47' },
-      { from: 'me', text: 'はいはい、俺もそう〜😭', ko: '그래그래, 나도 그래〜😭', time: '오후 5:48', read : false },
+      {
+        from: 'me', text: 'はいはい、俺もそう〜😭', ko: '그래그래, 나도 그래〜😭', time: '오후 5:48', read : false,
+        // 키보드로 친 뒤 전송 (俺은 おれ로 쳐서 변환)
+        typing: { ja: ['はいはい、', { text: '俺', kana: 'おれ' }, 'もそう〜😭'] },
+      },
     ],
   },
   ume: {

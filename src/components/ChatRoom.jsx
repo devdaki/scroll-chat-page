@@ -12,6 +12,15 @@ import { useChatLanguage } from '../context/ChatLanguage.jsx'
 const delayFor = (message) => 700 + message.text.length * 60
 // 키보드가 올라온 뒤 타이핑 시작까지
 const KEYBOARD_DELAY = 900
+// typing 메시지를 다 친 뒤 전송까지
+const SEND_DELAY = 600
+
+// typing이 있는 내 메시지 → 키보드로 칠 내용 (draft와 같은 형식, 안 적은 언어는 메시지 글자 그대로)
+const typingSource = (message) => {
+  if (message?.from !== 'me' || !message.typing) return null
+  const custom = message.typing === true ? {} : message.typing
+  return { ko: custom.ko ?? message.ko ?? message.text, ja: custom.ja ?? message.text }
+}
 
 // 전체 화면 LINE 채팅방. 채팅방 최상단이 화면 맨 위에 닿으면 재생을 시작해서
 // 메시지가 시간차로 하나씩 도착하고,
@@ -20,7 +29,9 @@ const KEYBOARD_DELAY = 900
 // date: 날짜 구분선. 문자열 하나면 맨 위에만,
 //   { 0: '10월 26일 (일)', 6: '10월 27일 (월)' }처럼 쓰면 해당 번호(0부터) 메시지 바로 앞에 나와요.
 // backTo: 뒤로 버튼을 눌렀을 때 갈 경로. 없으면 버튼은 모양만 있어요.
-// instant: true면 재생 없이 처음부터 전체 대화가 다 보여요.
+// instant: true면 재생 없이 처음부터 전체 대화가 다 보여요. (typing 메시지가 있으면 그 앞까지만)
+// 메시지에 typing: true를 쓰면 (내 메시지) 그 차례에 키보드로 한 글자씩 친 뒤 전송돼요.
+//   한자가 있으면 typing: { ja: ['はいはい、', { text: '俺', kana: 'おれ' }] }처럼 draft 형식으로 적어요.
 // draft: 대화가 끝나면 키보드가 올라오고, 이 글자를 입력칸에 한 글자씩 타이핑해요. (보내지는 않아요)
 //   ['괜찮아?', { erase: 'all' }, '뭐해']처럼 배열로 쓰면 치고·지우고·멈추기를 섞을 수 있어요.
 //   { ko: [...], ja: [...] }로 쓰면 채팅 언어에 맞는 쪽을 그 언어 키보드로 쳐요. (draft.js 참고)
@@ -32,7 +43,8 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
   const reduceMotion = useReducedMotion()
   // 재생 없이 한 번에 보여주기 (instant 또는 '동작 줄이기' 설정)
   const showAll = instant || reduceMotion
-  const [count, setCount] = useState(showAll ? messages.length : 0)
+  const firstTyping = messages.findIndex((m) => typingSource(m))
+  const [count, setCount] = useState(reduceMotion ? messages.length : instant ? (firstTyping === -1 ? messages.length : firstTyping) : 0)
   const roomRef = useRef(null)
   const bottomRef = useRef(null)
   const barRef = useRef(null)
@@ -47,16 +59,24 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
   const inView = useInView(roomRef)
   const done = count >= messages.length
 
-  // 키보드 + 타이핑 (draft가 있을 때만)
+  // 키보드 + 타이핑: 지금 차례인 typing 메시지, 또는 대화가 끝난 뒤의 draft
   const { language } = useChatLanguage()
-  const picked = pickDraft(draft, language)
-  const steps = useMemo(
-    () => (picked ? draftSteps(picked.items, typeSpeed, picked.lang) : []),
-    [picked?.items, picked?.lang, typeSpeed]
-  )
+  const source = started && !done ? typingSource(messages[count]) : null
+  const sending = Boolean(source)
+  const picked = pickDraft(done ? draft : source, language)
+  const steps = useMemo(() => {
+    if (!picked) return []
+    const list = draftSteps(picked.items, typeSpeed, picked.lang)
+    // 보내기 전에 일본어 밑줄(확정 전) 글자는 改行으로 확정
+    const last = list.at(-1)
+    if (sending && last?.composing) list.push({ ...last, key: 'return', composing: 0, candidates: [], delay: typeSpeed ?? 170 })
+    return list
+  }, [picked?.items, picked?.lang, typeSpeed, sending])
   const [step, setStep] = useState(reduceMotion ? steps.length : 0)
   const [pressed, setPressed] = useState(null)
-  const keyboardUp = Boolean(picked) && started && done
+  // typing 메시지를 한 번 보낸 뒤로는 키보드가 계속 올라와 있어요
+  const keyboardUp = started && (Boolean(picked) || messages.slice(0, count).some(typingSource))
+  const layout = picked?.lang ?? (language === 'ja' ? 'ja' : 'ko')
   const current = step > 0 ? steps[step - 1] : null
   const typed = current?.text ?? ''
   // 일본어: 끝에서 composing 글자만큼은 확정 전이라 밑줄
@@ -71,7 +91,7 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
 
   // 메시지를 하나씩 시간차로 추가
   useEffect(() => {
-    if (!started || done) return
+    if (!started || done || sending) return
     const next = messages[count]
     const timer = setTimeout(() => setCount(count + 1), count === 0 ? 900 : delayFor(next))
     return () => clearTimeout(timer)
@@ -79,13 +99,22 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
 
   // 키보드가 올라오면 잠깐 뒤에 한 키씩 타이핑
   useEffect(() => {
-    if (!keyboardUp || step >= steps.length) return
+    if (!keyboardUp) return
+    if (step >= steps.length) {
+      if (!sending) return
+      // typing 메시지는 다 치고 나면 전송: 입력칸 비우고 말풍선 추가
+      const timer = setTimeout(() => {
+        setStep(0)
+        setCount(count + 1)
+      }, SEND_DELAY)
+      return () => clearTimeout(timer)
+    }
     const timer = setTimeout(() => {
       setPressed(steps[step].key)
       setStep(step + 1)
     }, step === 0 ? KEYBOARD_DELAY : steps[step].delay)
     return () => clearTimeout(timer)
-  }, [keyboardUp, step, steps])
+  }, [keyboardUp, step, steps, sending, count])
 
   // 눌린 키 표시는 잠깐만
   useEffect(() => {
@@ -110,7 +139,7 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
     if (hidden > 0) window.scrollBy({ top: hidden, behavior: 'smooth' })
   }
   useEffect(() => {
-    if (!showAll) scrollToBottom()
+    if (!showAll || keyboardUp) scrollToBottom()
   }, [started, count])
 
   // 채팅방: 페이지 전체 스크롤을 쓰고, 헤더와 입력창은 채팅방 안에서만 고정
@@ -190,7 +219,7 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
               onAnimationComplete={scrollToBottom}
               className="overflow-hidden"
             >
-              <Keyboard layout={picked.lang} pressed={pressed} candidates={current?.candidates} />
+              <Keyboard layout={layout} pressed={pressed} candidates={current?.candidates} />
             </motion.div>
           )}
         </AnimatePresence>
