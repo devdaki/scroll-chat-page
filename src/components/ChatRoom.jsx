@@ -2,13 +2,13 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'motion/react'
 import { useNavigate } from 'react-router'
 import { ChevronLeft, Menu, Plus, Search, SendHorizontal, Smile } from 'lucide-react'
-import ChatBubble, { Avatar, AvatarSpace } from './ChatBubble.jsx'
+import ChatBubble from './ChatBubble.jsx'
 import Keyboard from './Keyboard.jsx'
 import IncomingNotifications from './IncomingNotifications.jsx'
 import { draftSteps, pickDraft } from './draft.js'
 import { useChatLanguage } from '../context/ChatLanguage.jsx'
 
-// 메시지 사이 간격: 기본 대기 + 글자 수만큼 '입력 중' 시간
+// 메시지 사이 간격: 기본 대기 + 글자 수에 비례
 const delayFor = (message) => 700 + message.text.length * 60
 // 키보드가 올라온 뒤 타이핑 시작까지
 const KEYBOARD_DELAY = 900
@@ -33,7 +33,6 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
   // 재생 없이 한 번에 보여주기 (instant 또는 '동작 줄이기' 설정)
   const showAll = instant || reduceMotion
   const [count, setCount] = useState(showAll ? messages.length : 0)
-  const [typing, setTyping] = useState(false)
   const roomRef = useRef(null)
   const bottomRef = useRef(null)
   const barRef = useRef(null)
@@ -74,11 +73,7 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
   useEffect(() => {
     if (!started || done) return
     const next = messages[count]
-    setTyping(next.from === 'them')
-    const timer = setTimeout(() => {
-      setTyping(false)
-      setCount(count + 1)
-    }, count === 0 ? 900 : delayFor(next))
+    const timer = setTimeout(() => setCount(count + 1), count === 0 ? 900 : delayFor(next))
     return () => clearTimeout(timer)
   }, [started, count, done])
 
@@ -116,7 +111,7 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
   }
   useEffect(() => {
     if (!showAll) scrollToBottom()
-  }, [started, count, typing])
+  }, [started, count])
 
   // 채팅방: 페이지 전체 스크롤을 쓰고, 헤더와 입력창은 채팅방 안에서만 고정
   return (
@@ -147,7 +142,6 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
             {i < count && <ChatBubble message={message} partner={partner} avatar={avatar} continued={isContinued(i)} read={message.read ?? read} />}
           </Fragment>
         ))}
-        {typing && <TypingIndicator partner={partner} avatar={avatar} continued={isContinued(count)} />}
         {finished && hasMore && (
           <motion.p
             initial={{ opacity: 0 }}
@@ -208,22 +202,4 @@ export default function ChatRoom({ messages, partner, avatar, date, backTo, hasM
 
 function DateDivider({ text }) {
   return <div className="mx-auto rounded-full bg-black/15 px-3 py-0.5 text-xs text-white">{text}</div>
-}
-
-function TypingIndicator({ partner, avatar, continued }) {
-  return (
-    <div className="flex items-end gap-1.5">
-      {continued ? <AvatarSpace /> : <Avatar name={partner} src={avatar} />}
-      <div className="flex gap-1 rounded-2xl rounded-tl-sm bg-white px-3.5 py-3">
-        {[0, 1, 2].map((i) => (
-          <motion.span
-            key={i}
-            className="h-1.5 w-1.5 rounded-full bg-neutral-400"
-            animate={{ opacity: [0.3, 1, 0.3] }}
-            transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-          />
-        ))}
-      </div>
-    </div>
-  )
 }
