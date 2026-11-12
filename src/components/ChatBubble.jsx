@@ -3,7 +3,7 @@ import { useChatLanguage, useLocalized } from '../context/ChatLanguage.jsx'
 
 // continued: 앞 메시지와 같은 사람이 이어서 보낸 경우 → 프로필·이름 없이 말풍선만
 // read: 내 메시지 옆 읽음 표시. true = 읽음, false = 표시 없음, 숫자 = 읽은 사람 수 (단체방, 예: 읽음 3)
-export default function ChatBubble({ message, partner, continued = false, read = true }) {
+export default function ChatBubble({ message, partner, avatar, continued = false, read = true }) {
   const isMe = message.from === 'me'
   const text = useLocalized()(message)
   const { language } = useChatLanguage()
@@ -17,7 +17,7 @@ export default function ChatBubble({ message, partner, continued = false, read =
       transition={{ duration: 0.25 }}
       className={`flex items-end gap-1.5 ${isMe ? 'flex-row-reverse' : ''} ${continued ? '-mt-1.5' : ''}`}
     >
-      {!isMe && (continued ? <AvatarSpace /> : <Avatar name={partner} />)}
+      {!isMe && (continued ? <AvatarSpace /> : <Avatar name={partner} src={avatar} />)}
 
       {/* 말풍선은 시간 표시 바로 앞까지 늘어날 수 있음 (min-w-0: 남은 폭 안에서 줄바꿈) */}
       <div className={`flex min-w-0 flex-col ${isMe ? 'items-end' : 'items-start'}`}>
@@ -44,7 +44,8 @@ export default function ChatBubble({ message, partner, continued = false, read =
   )
 }
 
-export function Avatar({ name }) {
+export function Avatar({ name, src }) {
+  if (src) return <img src={src} alt="" className="mb-auto h-9 w-9 shrink-0 rounded-[0.9rem] object-cover" />
   return (
     <div className="mb-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-[0.9rem] bg-amber-200 text-sm font-bold text-amber-700">
       {name[0]}

@@ -26,7 +26,7 @@ const KEYBOARD_DELAY = 900
 // typeSpeed: 키 하나 누르는 간격(ms), 기본 170. 클수록 느려요.
 // incoming: { messages: [{ sender, text, ko? }], interval? } 채팅방을 보는 동안 다른 사람 알림이 차례로 떠요. (누를 수 없음)
 // read: 내 메시지 읽음 표시 기본값 (true / false / 숫자). 메시지마다 read로 따로 정할 수도 있어요.
-export default function ChatRoom({ messages, partner, date, backTo, hasMore, onDone, instant = false, draft, typeSpeed, read = true, incoming }) {
+export default function ChatRoom({ messages, partner, avatar, date, backTo, hasMore, onDone, instant = false, draft, typeSpeed, read = true, incoming }) {
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
   // 재생 없이 한 번에 보여주기 (instant 또는 '동작 줄이기' 설정)
@@ -140,10 +140,10 @@ export default function ChatRoom({ messages, partner, date, backTo, hasMore, onD
         {messages.slice(0, count + 1).map((message, i) => (
           <Fragment key={i}>
             {dates[i] && <DateDivider text={dates[i]} />}
-            {i < count && <ChatBubble message={message} partner={partner} continued={isContinued(i)} read={message.read ?? read} />}
+            {i < count && <ChatBubble message={message} partner={partner} avatar={avatar} continued={isContinued(i)} read={message.read ?? read} />}
           </Fragment>
         ))}
-        {typing && <TypingIndicator partner={partner} continued={isContinued(count)} />}
+        {typing && <TypingIndicator partner={partner} avatar={avatar} continued={isContinued(count)} />}
         {finished && hasMore && (
           <motion.p
             initial={{ opacity: 0 }}
@@ -204,10 +204,10 @@ function DateDivider({ text }) {
   return <div className="mx-auto rounded-full bg-black/15 px-3 py-0.5 text-xs text-white">{text}</div>
 }
 
-function TypingIndicator({ partner, continued }) {
+function TypingIndicator({ partner, avatar, continued }) {
   return (
     <div className="flex items-end gap-1.5">
-      {continued ? <AvatarSpace /> : <Avatar name={partner} />}
+      {continued ? <AvatarSpace /> : <Avatar name={partner} src={avatar} />}
       <div className="flex gap-1 rounded-2xl rounded-tl-sm bg-white px-3.5 py-3">
         {[0, 1, 2].map((i) => (
           <motion.span

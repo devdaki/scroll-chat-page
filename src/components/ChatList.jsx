@@ -50,7 +50,7 @@ function ChatListItem({ room, onOpen }) {
   const text = useLocalized()(room)
   const content = (
     <>
-      <ListAvatar name={room.name} />
+      <ListAvatar name={room.name} src={room.avatar} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1">
           <span className="truncate text-[16px] font-semibold">{room.name}</span>
@@ -96,7 +96,8 @@ const AVATAR_COLORS = [
   'bg-orange-200 text-orange-700',
 ]
 
-function ListAvatar({ name }) {
+function ListAvatar({ name, src }) {
+  if (src) return <img src={src} alt="" className="h-13 w-13 shrink-0 rounded-full object-cover" />
   const hash = [...name].reduce((sum, ch) => sum + ch.codePointAt(0), 0)
   return (
     <div

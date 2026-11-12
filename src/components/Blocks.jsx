@@ -122,6 +122,7 @@ function Block({ block, hasMore, reveal, onDone }) {
         <ChatRoom
           messages={block.messages}
           partner={block.partner}
+          avatar={block.avatar}
           date={block.date}
           backTo={block.backTo}
           instant={block.instant}
