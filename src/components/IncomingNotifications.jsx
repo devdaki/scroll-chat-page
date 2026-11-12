@@ -20,7 +20,8 @@ export default function IncomingNotifications({ messages, interval = 2000, playi
   }, [playing, index, messages.length, interval])
 
   const current = playing ? messages[index] : null
-  const hidden = reduceMotion ? { opacity: 0 } : { opacity: 0, y: '-120%' }
+  // 투명도는 건드리지 않고 위에서 내려오기만 해요 (투명도가 바뀌는 동안엔 배경 흐림이 안 먹어서 늦게 불투명해 보여요)
+  const hidden = reduceMotion ? { opacity: 0 } : { y: '-120%' }
 
   return (
     <AnimatePresence>
