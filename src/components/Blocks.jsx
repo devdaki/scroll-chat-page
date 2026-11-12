@@ -102,6 +102,7 @@ function Block({ block, hasMore, reveal, onDone }) {
       return (
         <LineNotification
           sender={block.sender}
+          avatar={block.avatar}
           text={localized(block)}
           to={block.to}
           onOpen={block.opens ? () => reveal(block.opens) : undefined}

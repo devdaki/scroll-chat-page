@@ -5,7 +5,7 @@
 //                문단 안에 *** 만 있는 줄은 가운데 정렬된 장면 구분선으로 보여요
 //                구분선 위아래 간격을 넓히려면 \n 대신 엔터로 빈 줄을 더 넣으세요 (빈 줄 1줄 = 기본)
 //   youtube      { videoId, caption?, title? }         videoId = youtube.com/watch?v=여기부분
-//   notification { sender, text, ko?, opens?, to?, autoHide?, duration? }  이 위치를 지나면 상단에 LINE 알림
+//   notification { sender, avatar?, text, ko?, opens?, to?, autoHide?, duration? }  이 위치를 지나면 상단에 LINE 알림
 //                opens: 탭하면 펼칠 채팅방 id. to: 탭하면 이동할 페이지 경로
 //   help         { text }                              가운데 정렬 회색 도움말 (줄바꿈 가능)
 //   list         { title, items: [...], numbered? }     회색 박스 목록 (안내 페이지용)
@@ -25,10 +25,11 @@
 //                       (문자열·배열만 쓰면 한국어 키보드)
 //                       일본어는 히라가나로 치고, 한자로 바꾸려면 { text: 'ご飯は', kana: 'ごはんは' }
 //                typeSpeed: 키 하나 누르는 간격(ms). 기본 170, 클수록 느려요.
-//                incoming: { interval?, messages: [{ sender, text, ko? }] } 채팅방을 보는 동안 다른 사람 알림이
+//                incoming: { interval?, messages: [{ sender, avatar?, text, ko? }] } 채팅방을 보는 동안 다른 사람 알림이
 //                          interval(ms, 기본 2000)마다 하나씩 떠요. 누를 수 없고, 다 나오면 끝.
 //   chatlist     { rooms, title? }                     전체 화면 LINE 대화 목록 (rooms는 chats.js의 chatLists에서)
 import { chatLists, chats } from '../chats.js'
+import { mobProfile1, mobProfile2, mobProfile3, mobProfile4, mobProfile5, mobProfile6, mobProfile7 } from '../images'
 export default {
   title: '난바-원 下',
   blocks: [
@@ -298,7 +299,7 @@ export default {
         `동시에 라인 메시지 알림창이 떴다. 발신인은 쿄짱. 그대로 들어가 답장을 남긴다.`,
       ],
     },
-    { type: 'notification', sender: 'きょうちゃん', text: 'さっき会ったばっかなのに、もう会いたいんだけど〜😢', ko: '방금 만났는데 벌써 보고 싶어〜😢', opens: 'kyo' },
+    { type: 'notification', sender: 'きょうちゃん', avatar: mobProfile1, text: 'さっき会ったばっかなのに、もう会いたいんだけど〜😢', ko: '방금 만났는데 벌써 보고 싶어〜😢', opens: 'kyo' },
     { type: 'help', text: `위에 뜬 알림을 눌러 대화를 확인해보세요.` },
     // 알림을 탭하면 나타나는 채팅방. 대화가 끝나면 아래 블록들이 이어서 나타나요.
     { type: 'chat', id: 'kyo', hidden: true, ...chats.kyo, date: '10월 27일 (월)' },
@@ -354,14 +355,14 @@ export default {
       incoming: {
         interval: 3000,
         messages: [
-          { sender: 'ヒカリちゃん♥', text: 'なんで返信がこんなに遅いんだ？', ko: '왜 이렇게 답장이 늦어?' },
-          { sender: 'ユナちゃん♥', text: 'トアちゃん、今日会える？', ko: '토아짱, 오늘 만날 수 있어?' },
-          { sender: 'キリちゃん🤍', text: 'トアはバカだね😍', ko: '토아는 바보네😍' },
-          { sender: 'トッちゃん♥', text: '君、今何してるの？', ko: '너 지금 뭐 해?' },
-          { sender: 'アヤちゃん🫶', text: '私にだけ返信してくれないの？', ko: '나한테만 답장 안 해주는 거야?' },
-          { sender: 'リナち♥', text: '君、嫌い！', ko: '너 싫어!' },
-          { sender: 'サキ😍', text: '忙しいのかな？', ko: '바쁜가?' },
-          { sender: 'マユち😻', text: '会いたい♡', ko: '보고 싶어♡' },
+          { sender: 'ヒカリちゃん♥', avatar: mobProfile3, text: 'なんで返信がこんなに遅いんだ？', ko: '왜 이렇게 답장이 늦어?' },
+          { sender: 'ユナちゃん♥', avatar: mobProfile5, text: 'トアちゃん、今日会える？', ko: '토아짱, 오늘 만날 수 있어?' },
+          { sender: 'キリちゃん🤍', avatar: mobProfile2, text: 'トアはバカだね😍', ko: '토아는 바보네😍' },
+          { sender: 'トッちゃん♥', avatar: mobProfile6, text: '君、今何してるの？', ko: '너 지금 뭐 해?' },
+          { sender: 'アヤちゃん🫶', avatar: mobProfile7, text: '私にだけ返信してくれないの？', ko: '나한테만 답장 안 해주는 거야?' },
+          { sender: 'リナち♥', avatar: mobProfile7, text: '君、嫌い！', ko: '너 싫어!' },
+          { sender: 'サキ😍', avatar: mobProfile4, text: '忙しいのかな？', ko: '바쁜가?' },
+          { sender: 'マユち😻', avatar: mobProfile7, text: '会いたい♡', ko: '보고 싶어♡' },
         ],
       },
     },

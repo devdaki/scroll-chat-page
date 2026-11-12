@@ -7,7 +7,7 @@ import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScro
 // autoHide=true: 지날 때마다 떴다가 duration(ms) 뒤에 자동으로 사라져요.
 // onOpen: 알림을 탭했을 때 실행할 함수. 실행 후 알림은 다시 뜨지 않아요.
 // to: 알림을 탭하면 이동할 페이지 경로. onOpen과 to가 모두 없으면 탭했을 때 알림만 닫혀요.
-export default function LineNotification({ sender, text, autoHide = false, duration = 3500, to, onOpen }) {
+export default function LineNotification({ sender, avatar, text, autoHide = false, duration = 3500, to, onOpen }) {
   const triggerRef = useRef(null)
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
@@ -60,7 +60,7 @@ export default function LineNotification({ sender, text, autoHide = false, durat
             onClick={handleClick}
             className={`fixed inset-x-0 top-0 z-50 mx-auto max-w-md px-2 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] ${to || onOpen ? 'cursor-pointer' : ''}`}
           >
-            <NotificationCard sender={sender} text={text} />
+            <NotificationCard sender={sender} avatar={avatar} text={text} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -69,13 +69,22 @@ export default function LineNotification({ sender, text, autoHide = false, durat
 }
 
 // 알림 배너 모양 (IncomingNotifications에서도 같이 써요)
-export function NotificationCard({ sender, text }) {
+// avatar가 있으면 프로필 사진 + 오른쪽 아래 작은 LINE 아이콘, 없으면 LINE 앱 아이콘만
+export function NotificationCard({ sender, avatar, text }) {
   return (
     <div className="flex items-center gap-3 rounded-[1.4rem] bg-white/75 p-3 shadow-lg ring-1 ring-black/5 backdrop-blur-xl">
-      {/* LINE 앱 아이콘 */}
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.65rem] bg-[#06c755] text-[10px] font-black tracking-tight text-white">
-        LINE
-      </div>
+      {avatar ? (
+        <div className="relative h-10 w-10 shrink-0">
+          <img src={avatar} alt="" className="h-10 w-10 rounded-full object-cover" />
+          <div className="absolute -right-1 -bottom-1 flex h-4.5 w-4.5 items-center justify-center rounded-[0.3rem] bg-[#06c755] text-[5px] font-black text-white ring-2 ring-white">
+            LINE
+          </div>
+        </div>
+      ) : (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.65rem] bg-[#06c755] text-[10px] font-black tracking-tight text-white">
+          LINE
+        </div>
+      )}
 
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
